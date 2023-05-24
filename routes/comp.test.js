@@ -61,4 +61,3 @@ describe("DELETE /companies/:code", () => {
       expect(res.body).toEqual({ status: 'deleted' })
   })
 })
-
