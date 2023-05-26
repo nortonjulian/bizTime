@@ -4,10 +4,13 @@ const request = require('supertest')
 const app = require('../app')
 const db = require('../db')
 
-let testInv;
+let testInv, testComp;
 beforeEach(async () => {
-    const result = await db.query(`INSERT INTO invoices (id, comp_code) VALUES (813, 90210) RETURNING id, comp_code`)
-    testComp = result.rows[0]
+    const compResult = await db.query(`INSERT INTO companies (code, name, description) VALUES (90210, 'InCali', 'This is a test company') RETURNING code`)
+    testComp = compResult.rows[0]
+
+    const invResult = await db.query(`INSERT INTO invoices (comp_code, amt) VALUES ('${testComp.code}', 10000) RETURNING id, comp_code, amt`);
+    testInv = invResult.rows[0]
 })
 
 afterEach(async () => {
@@ -37,9 +40,9 @@ describe("GET /invoices/:id", () => {
 
 describe("POST /invoices", () => {
    test("Creates an invoice", async () => {
-      const res = await request(app).post('/invoices').send({ comp_code: 90210, amt: 10000 })
+      const res = await request(app).post('/invoices').send({ comp_code: testComp.code, amt: 10000 })
       expect(res.statusCode).toBe(201);
-      expect(res.body).toEqual({ invoice: { comp_code: 90210, amt: 10000}})
+      expect(res.body).toEqual({ invoice: { comp_code: testComp.code, amt: 10000}})
    })
 })
 
