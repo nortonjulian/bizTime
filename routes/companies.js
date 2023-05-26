@@ -52,11 +52,11 @@ router.post('/', async (req, res, next) => {
 router.patch('/:code', async (req, res, next) => {
     try {
         let { name, description } = req.body
-        let { code } = req.params.code
+        let code  = req.params.code
 
         const result = await db.query(`UPDATE companies SET name=$1,
                                     description=$2 WHERE code=$3
-                                    RETURNING code, name, description`, [code, name, description])
+                                    RETURNING code, name, description`, [name, description, code])
 
         if (result.rows.length === 0) {
             throw new ExpressError(`Can't find company with a code of ${code}`, 404)
