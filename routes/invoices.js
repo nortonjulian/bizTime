@@ -95,7 +95,7 @@ router.delete('/:id', async (req, res, next) => {
     try {
         let id = req.params.id;
 
-        const result = await db.query("DELETE FROM invoices WHERE id = $1 RETURNING id", [req.params.id]);
+        const result = await db.query("DELETE FROM invoices WHERE id = $1 RETURNING id", [id]);
 
         if (result.rows.length === 0) {
             throw new ExpressError(`No invoice with id: ${id}`, 404);

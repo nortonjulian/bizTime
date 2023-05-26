@@ -6,7 +6,7 @@ const db = require('../db')
 
 let testComp;
 beforeEach(async () => {
-    const result = await db.query(`INSERT INTO companies (name, description) VALUES ('Nike', 'footwear') RETURNING id, name, description`)
+    const result = await db.query(`INSERT INTO companies (code, name, description) VALUES ('NKE','Nike', 'footwear') RETURNING code, name, description`)
     testComp = result.rows[0]
 })
 
@@ -29,16 +29,17 @@ describe("GET /companies", () => {
 describe("GET /companies/:code", () => {
    test("Get a single company", async () => {
       const res = await request(app).get(`/companies/${testComp.code}`)
-      expect(statusCode).toBe(200);
-      expect(res.body).toEqual({ company: [testComp]})
+      testComp["invoices"] = []
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ company: testComp })
    })
 })
 
 describe("POST /companies", () => {
    test("Creates a company", async () => {
-      const res = (await request(app).post('/companies')).send({ name: 'Nike', description: 'footwear' })
+      const res = await request(app).post('/companies').send({ name: 'GNC', description: 'health' })
       expect(res.statusCode).toBe(201);
-      expect(res.body).toEqual({ company: { code: testComp.code, name: "Nike", description: 'footwear' }})
+      expect(res.body).toEqual({ company: { code: 'gnc', name: "GNC", description: 'health' }})
    })
 })
 
@@ -50,14 +51,16 @@ describe("PATCH /companies/:code", () => {
    })
 })
 test("Responds with 404 for invalid id", async () => {
-    const res = await request(app).patch('/companies/0').send({ name: 'Nike', description: 'footwear' })
+    const res = await request(app).patch(`/companies/0`).send({ name: 'Nike', description: 'footwear' })
     expect(res.statusCode).toBe(404);
 })
 
 describe("DELETE /companies/:code", () => {
     test("Deletes a single user", async () => {
       const res = await request(app).delete(`/companies/${testComp.code}`);
+      console.log(res.body)
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({ status: 'deleted' })
+      console.log(res.body)
   })
 })
