@@ -68,7 +68,7 @@ router.put('/:id', async (req, res, next) => {
         let id = req.params.id;
         let paidDate = null;
 
-        const currRes = await db.query(`SELECT comp_code, amt FROM invoices WHERE id = $1`, [id]);
+        const currRes = await db.query(`SELECT paid FROM invoices WHERE id = $1`, [id]);
 
         if (currRes.rows.length === 0) {
             throw new ExpressError(`No invoice with id: ${id}`, 404)

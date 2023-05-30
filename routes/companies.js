@@ -69,8 +69,14 @@ router.patch('/:code', async (req, res, next) => {
 
 router.delete('/:code', async (req, res, next) => {
     try {
-        const result = await db.query("DELETE FROM companies WHERE code = $1 RETURNING code", [req.params.code]);
-        return res.json({status: "deleted"})
+        let code = req.params.code;
+        const result = await db.query("DELETE FROM companies WHERE code = $1 RETURNING code", [code]);
+
+        if (result.rows.length == 0){
+            throw new ExpressError(`No company at: ${code}`, 404)
+        } else {
+            return res.json({status: "deleted"})
+        }
     } catch (err) {
         return next(err)
     }
