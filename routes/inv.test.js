@@ -6,7 +6,7 @@ const db = require('../db')
 
 let testInv, testComp;
 beforeEach(async () => {
-    const compResult = await db.query(`INSERT INTO companies (code, name, description) VALUES ('90210', 'InCali', 'This is a test company') RETURNING code`)
+    const compResult = await db.query(`INSERT INTO companies (code, name, description) VALUES ('90210', 'InCali', 'This is a test company') RETURNING code, name, description`)
     testComp = compResult.rows[0]
 
     const invResult = await db.query(`INSERT INTO invoices (comp_code, amt) VALUES (90210, 10000) RETURNING id, comp_code, amt`);
@@ -42,21 +42,21 @@ describe("GET /invoices/:id", () => {
 
 describe("POST /invoices", () => {
    test("Creates an invoice", async () => {
-      const res = await request(app).post('/invoices').send({ comp_code: "90210", amt: 10000 })
+      const res = await request(app).post('/invoices').send({ id: 1, comp_code: 90210, amt: 10000  })
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({ invoice: { id: expect.any(Number), comp_code: testComp.code, amt: 10000}})
+      expect(res.body).toEqual({ invoice: { id: expect.any(Number), comp_code: testComp.code, amt: 10000, paid: false, paid_date: null, add_date: expect.any(String) }})
    })
 })
 
-describe("PATCH /invoices/:id", () => {
+describe("PUT /invoices/:id", () => {
    test("Updates a single invoice", async () => {
-     const res = await request(app).patch(`/invoices/${testInv.id}`).send({ comp_code: 90210, amt: 10000 })
+     const res = await request(app).put(`/invoices/${testInv.id}`).send({ paid: true, amt: 10001 })
      expect(res.statusCode).toBe(200);
-     expect(res.body).toEqual({ invoice: { id: testInv.id, comp_code: 90211, amt: 10001 }})
+     expect(res.body).toEqual({ invoice: { id: testInv.id, comp_code: "90210", amt: 10001, paid: true, paid_date: expect.any(String), add_date: expect.any(String) }})
    })
 })
 test("Responds with 404 for invalid id", async () => {
-    const res = await request(app).patch(`/invoices/0`).send({ comp_code: 90210, amt: 10000 })
+    const res = await request(app).put(`/invoices/0`).send({ paid: true, amt: 10000 })
     expect(res.statusCode).toBe(404);
 })
 

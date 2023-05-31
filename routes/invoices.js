@@ -56,7 +56,7 @@ router.post('/', async (req, res, next) => {
         let { comp_code, amt } = req.body;
         results = await db.query(`INSERT INTO invoices (comp_code, amt) VALUES ($1, $2) RETURNING id, comp_code, amt, paid, add_date, paid_date`, [comp_code, amt])
 
-        return res.json({"invoice": result.rows[0]})
+        return res.json({"invoice": results.rows[0]})
     } catch (err) {
         return next(err)
     }
@@ -84,7 +84,7 @@ router.put('/:id', async (req, res, next) => {
             paidDate = currPaidDate;
         }
 
-        const result = await db.query(`UPDATE invoices SET amt=$1, paid=$2, paid_date=$3 WHERE id=$4 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [amt, paid, id, paidDate])
+        const result = await db.query(`UPDATE invoices SET amt=$1, paid=$2, paid_date=$3 WHERE id=$4 RETURNING id, comp_code, amt, paid, add_date, paid_date`, [amt, paid, paidDate, id])
         return res.json({"invoice": result.rows[0]})
     } catch (err) {
         return next(err)
